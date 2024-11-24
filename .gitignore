@@ -1,0 +1,15 @@
+*.pth
+*.zip
+*.pyc
+
+__pycache__/
+**/__pycache__/
+temp_colorization/
+
+static/temp_images/
+
+# Test directories
+test/
+tests/
+**/test/
+**/tests/

@@ -1,0 +1,7 @@
+PyMuPDF>=1.22.5  # for PDF handling (fitz)
+numpy>=1.24.0    # for array operations
+Pillow>=10.0.0   # for image processing (PIL)
+opencv-python>=4.8.0  # for cv2
+torch>=2.0.0     # likely needed for MangaColorizator
+torchvision>=0.15.0  # likely needed for image processing models
+colorama>=0.4.6    # for colored output in Windows
