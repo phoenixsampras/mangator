@@ -1,7 +1,15 @@
 PyMuPDF>=1.22.5  # for PDF handling (fitz)
 numpy>=1.24.0    # for array operations
 Pillow>=10.0.0   # for image processing (PIL)
-opencv-python>=4.8.0  # for cv2
-torch>=2.0.0     # likely needed for MangaColorizator
-torchvision>=0.15.0  # likely needed for image processing models
+opencv-python>=4.8.0  # for cv2 and YOLO
+torch>=2.0.0     # for MangaColorizator
+torchvision>=0.15.0  # for image processing models
 colorama>=0.4.6    # for colored output in Windows
+
+# YOLO specific
+opencv-python-headless>=4.8.0  # headless version for servers
+requests>=2.31.0       # for downloading YOLO weights if needed
+
+# Utils
+tqdm>=4.66.1          # for progress bars
+scikit-image>=0.21.0  # for additional image processing
