@@ -18,6 +18,7 @@ from colorama import init, Fore, Style
 import time
 import mediapipe as mp
 from PIL import ImageFilter, ImageDraw
+from PIL import ImageEnhance
 
 # Inicializar colorama para Windows
 init()
@@ -35,6 +36,7 @@ class PDFColorizator:
                  ai_upscale: bool = False,
                  preserve_text: float = 0.5,
                  color_intensity: float = 1.0,
+                 contrast_factor: float = 1.0,
                  extraction_quality: float = 2.0):
         """
         Inicializa el colorizador de PDFs.
@@ -51,6 +53,7 @@ class PDFColorizator:
             preserve_text: Intensidad de preservación del texto (0.0 a 1.0)
                           0.0 = no preservar, 1.0 = preservar completamente
             color_intensity: Factor de intensidad de color (0.5 = pastel, 1.0 = normal, 1.5 = vivido)
+            contrast_factor: Factor de contraste (1.0 = normal, >1.0 = más contraste)
             extraction_quality: Factor de calidad para extracción
         """
         self.device = 'cuda' if use_gpu else 'cpu'
@@ -62,6 +65,7 @@ class PDFColorizator:
         self.ai_upscale = ai_upscale
         self.preserve_text = preserve_text
         self.color_intensity = max(0.5, min(2.0, color_intensity))
+        self.contrast_factor = max(0.5, min(2.0, contrast_factor))
         self.extraction_quality = extraction_quality
         self.mp_face_detection = mp.solutions.face_detection
         self.mp_pose = mp.solutions.pose
@@ -432,11 +436,23 @@ class PDFColorizator:
                 result = colorized
             
             Image.fromarray(result).save(
-                os.path.join(temp_dir, f"page_{page_num:03d}_09_final.png")
+                os.path.join(temp_dir, f"page_{page_num:03d}_09_contrast.png")
             )
             
-            # Antes de retornar, recortar bordes blancos
+            # Antes de recortar bordes blancos, aplicar ajuste de contraste
             result_image = Image.fromarray(result)
+            
+            # Aumentar el contraste usando enhance
+            enhancer = ImageEnhance.Contrast(result_image)
+            contrast_factor = self.contrast_factor  # Ajustar este valor según necesidad (>1 aumenta contraste)
+            result_image = enhancer.enhance(contrast_factor)
+            
+            # Guardar versión con contraste
+            result_image.save(
+                os.path.join(temp_dir, f"page_{page_num:03d}_09_contrast.png")
+            )
+            
+            # Recortar bordes blancos
             trimmed_image = self.trim_white_borders(result_image)
             
             # Guardar versión final recortada
@@ -618,7 +634,8 @@ def colorize_pdf(pdf_path: str,
                 zoom: float = 1.0,
                 ai_upscale: bool = False,
                 preserve_text: float = 0.5,
-                color_intensity: float = 1.5) -> str:
+                color_intensity: float = 1.5,
+                contrast_factor: float = 1.0) -> str:
     """
     Función de conveniencia para colorizar un PDF.
     
@@ -635,6 +652,7 @@ def colorize_pdf(pdf_path: str,
         ai_upscale: Si usar IA para upscaling
         preserve_text: Intensidad de preservación del texto (0.0 a 1.0)
         color_intensity: Factor de intensidad de color (0.5 = pastel, 1.0 = normal, 1.5 = vivido)
+        contrast_factor: Factor de contraste (1.0 = normal, >1.0 = más contraste)
     """
     colorizator = PDFColorizator(
         use_gpu=use_gpu,
@@ -644,7 +662,8 @@ def colorize_pdf(pdf_path: str,
         zoom=zoom,
         ai_upscale=ai_upscale,
         preserve_text=preserve_text,
-        color_intensity=color_intensity
+        color_intensity=color_intensity,
+        contrast_factor=contrast_factor
     )
     
     return colorizator.process_pdf(pdf_path, output_path, start_page, end_page)
@@ -668,6 +687,8 @@ if __name__ == "__main__":
                        help="Intensidad de preservación del texto (0.0 a 1.0, default: 0.5)")
     parser.add_argument("-ci", "--color_intensity", type=float, default=1.5,
                        help="Factor de intensidad de color (0.5 = pastel, 1.0 = normal, 1.5 = vivido)")
+    parser.add_argument("-cf", "--contrast_factor", type=float, default=1.0,
+                       help="Factor de contraste (1.0 = normal, >1.0 = más contraste)")
     parser.add_argument("-sp", "--start_page", type=int,
                        help="Página inicial a procesar (1-based)")
     parser.add_argument("-ep", "--end_page", type=int,
@@ -692,7 +713,8 @@ if __name__ == "__main__":
             args.zoom,
             args.ai_upscale,
             args.preserve_text,
-            args.color_intensity
+            args.color_intensity,
+            args.contrast_factor
         )
     except Exception as e:
         print(f"Error: {str(e)}")

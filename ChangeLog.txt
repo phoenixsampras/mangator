@@ -1,0 +1,5 @@
+[1.2.1] - 2024-03-21
+- Added: New contrast_factor parameter for fine-tuning contrast
+- Improved: Colorization process with configurable contrast adjustment
+- Technical: Implementation of PIL.ImageEnhance.Contrast for better quality
+- Security: Limits implemented to prevent extreme contrast values
