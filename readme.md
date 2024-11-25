@@ -80,10 +80,12 @@ python inference_pdf.py \
     -ai \                  # Enable AI upscaling
     -pt 0 \               # Disable text preservation
     -ci 1 \               # Normal color intensity
+    -cf 1.2 \             # Increased contrast
+    -sf 1.0 \             # Normal sharpness
     "path/to/manga.pdf"
 
-# Real example
-python inference_pdf.py -sp 1 -ep 140 -z 1.5 -ai -pt 0 -ci 1 "manga/nakidpics.pdf"
+# Real example with enhanced contrast and sharpness
+python inference_pdf.py -sp 14 -ep 17 -z 1.5 -ai -pt 0 -ci 1 -cf 1.5 -sf 1.2 "manga/chapter.pdf"
 
 # Process specific chapter with GPU
 python inference_pdf.py \
@@ -94,16 +96,22 @@ python inference_pdf.py \
     "manga/chapter5.pdf"
 ```
 
-Available options:
-- `-sp, --start_page`: Start page number
-- `-ep, --end_page`: End page number
-- `-z, --zoom`: Output zoom factor (0.1-4.0)
-- `-ai, --ai_upscale`: Enable RealESRGAN upscaling
-- `-pt, --preserve_text`: Text preservation (0.0-1.0)
-- `-ci, --color_intensity`: Color intensity (0.5-2.0)
-- `-g, --gpu`: Enable GPU acceleration
-- `-s, --size`: Processing size (multiple of 32)
-- `-ds, --denoiser_sigma`: Denoising strength (1-50)
+### 📸 Example Results
+
+![Example Colorization](example1.png)
+*Left: Original black & white manga page. Right: AI-colorized result with enhanced contrast (cf=1.5) and sharpness (sf=1.2)*
+
+Command used for this example:
+```bash
+python inference_pdf.py -sp 14 -ep 17 -z 1.5 -ai -pt 0 -ci 1 -cf 1.5 -sf 1.2 "manga/chapter.pdf"
+```
+
+Key settings:
+- AI upscaling enabled (-ai)
+- No text preservation (-pt 0) for artistic consistency
+- Normal color intensity (-ci 1)
+- Enhanced contrast (-cf 1.5)
+- Subtle sharpness increase (-sf 1.2)
 
 ## 🛠️ Configuration Options
 
@@ -118,6 +126,8 @@ Available options:
 | `-ai, --ai_upscale` | `False` | Enable RealESRGAN upscaling |
 | `-pt, --preserve_text` | `0.5` | Text preservation strength (0.0-1.0) |
 | `-ci, --color_intensity` | `1.0` | Color intensity (0.5-2.0) |
+| `-cf, --contrast_factor` | `1.2` | Contrast enhancement (0.5-2.0) |
+| `-sf, --sharpness_factor` | `1.0` | Sharpness enhancement (0.0-2.0) |
 
 ## 📁 Project Structure
 ```
@@ -158,6 +168,16 @@ manga-colorizator/
    colorizer = PDFColorizer(
        preserve_text=0.8,
        denoiser_sigma=15
+   )
+   ```
+
+4. **Over-processed Images**
+   ```python
+   # Reduce enhancement factors
+   colorizer = PDFColorizer(
+       contrast_factor=1.1,    # Subtle contrast increase
+       sharpness_factor=1.0,   # No sharpness change
+       color_intensity=1.0     # Normal colors
    )
    ```
 
